@@ -1,6 +1,8 @@
 import { useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
 
+import './App.css';
+
 import GameBlock from "./components/GameBlock";
 
 import { getX, getY, BLOCK_SIZE, NUM_EDGE_BLOCKS } from "./common";
