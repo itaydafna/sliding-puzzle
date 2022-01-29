@@ -1,7 +1,9 @@
-import React, { useState, useCallback, useMemo } from "react";
-import "./App.css";
+import { useState, useCallback, useMemo } from "react";
+import styled from "styled-components";
 
 import GameBlock from "./components/GameBlock";
+
+import { getX, getY, BLOCK_SIZE, NUM_EDGE_BLOCKS } from "./common";
 
 type Block = {
   correctIndex: number;
@@ -15,11 +17,7 @@ type State = {
   gameBlocks: Block[];
 };
 
-const EDGE_SIZE = 3;
-const GAME_BLOCKS_NUMBER = EDGE_SIZE * EDGE_SIZE;
-
-const getX = (index: number): number => index % EDGE_SIZE;
-const getY = (index: number): number => Math.floor(index / EDGE_SIZE);
+const GAME_BLOCKS_NUMBER = NUM_EDGE_BLOCKS * NUM_EDGE_BLOCKS;
 
 const getIsNextToSpace = (
   currentIndex: number,
@@ -45,8 +43,8 @@ const getInitialState = (
     correctIndex: index,
     currentIndex: index,
     isNextToSpace: getIsNextToSpace(index, spaceIndex),
-    isSpace: index === spaceIndex
-  }))
+    isSpace: index === spaceIndex,
+  })),
 });
 
 function App() {
@@ -69,8 +67,8 @@ function App() {
           ...block,
           currentIndex: i,
           isNextToSpace: getIsNextToSpace(i, index),
-          isSpace: i === index
-        }))
+          isSpace: i === index,
+        })),
       });
     },
     [gameBlocks, spaceIndex]
@@ -84,35 +82,32 @@ function App() {
     [gameBlocks]
   );
 
-  console.log({ isComplete });
-
   return (
     <div className="App">
-      <div
-        id="game-board"
-        className={`h-${20 * EDGE_SIZE} w-${
-          20 * EDGE_SIZE
-        } relative border-solid border-2 ${isComplete && "border-green-400"}`}
-      >
+      <GameBoard isComplete={isComplete}>
         {gameBlocks.map(
           ({ correctIndex, currentIndex, isSpace, isNextToSpace }) =>
             isSpace ? null : (
-              <div
+              <GameBlock
                 key={correctIndex}
+                index={currentIndex}
+                isNextToSpace={isNextToSpace}
                 onClick={isNextToSpace ? () => onMove(currentIndex) : () => {}}
-                className={`absolute flex justify-center items-center w-20 h-20 trans ${
-                  isNextToSpace && "cursor-pointer"
-                } translate-x-${getX(currentIndex) * 20} translate-y-${
-                  getY(currentIndex) * 20
-                }`}
               >
                 {correctIndex + 1}
-              </div>
+              </GameBlock>
             )
         )}
-      </div>
+      </GameBoard>
     </div>
   );
 }
+
+const GameBoard = styled.div<{ isComplete: boolean }>`
+  position: relative;
+  height: ${BLOCK_SIZE * NUM_EDGE_BLOCKS}px;
+  width: ${BLOCK_SIZE * NUM_EDGE_BLOCKS}px;
+  ${({ isComplete }) => isComplete && "border: 1px solid green"};
+`;
 
 export default App;
