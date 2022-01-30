@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import styled, { css } from "styled-components";
+import { motion } from "framer-motion";
 
 import { BLOCK_SIZE, getX, getY } from "../common";
 
@@ -12,27 +13,31 @@ const GameBlock: React.FC<Props> = ({
   index,
   isNextToSpace,
   onClick,
-  children,
+  children
 }) => {
   const backgroundColor = useMemo(
-    () => "#000000".replace(/0/g,function(){return (~~(Math.random()*16)).toString(16);}),
+    () =>
+      "#000000".replace(/0/g, function () {
+        return (~~(Math.random() * 16)).toString(16);
+      }),
     []
   );
 
   return (
     <StyledGameBlock
-      index={index}
       isNextToSpace={isNextToSpace}
       backgroundColor={backgroundColor}
       onClick={onClick}
+      initial={false}
+      animate={{ x: getX(index) * BLOCK_SIZE, y: getY(index) * BLOCK_SIZE }}
+      transition={{ type: "tween" }}
     >
       {children}
     </StyledGameBlock>
   );
 };
 
-const StyledGameBlock = styled.div<{
-  index: number;
+const StyledGameBlock = styled(motion.div)<{
   isNextToSpace: boolean;
   backgroundColor: string;
 }>`
@@ -44,15 +49,6 @@ const StyledGameBlock = styled.div<{
   height: ${BLOCK_SIZE}px;
   background-color: ${({ backgroundColor }) => backgroundColor};
   ${({ isNextToSpace }) => isNextToSpace && "cursor: pointer"};
-
-  ${({ index }) => css`
-    transform: translate(
-      ${getX(index) * BLOCK_SIZE}px,
-      ${getY(index) * BLOCK_SIZE}px
-    );
-  `}
-
-  transition: transform 400ms;
 `;
 
 export default GameBlock;
