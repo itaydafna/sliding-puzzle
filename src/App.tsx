@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
 
-import './App.css';
+import "./App.css";
 
 import GameBlock from "./components/GameBlock";
 
@@ -14,12 +14,8 @@ type Block = {
   isSpace: boolean;
 };
 
-type State = {
-  spaceIndex: number;
-  gameBlocks: Block[];
-};
-
 const GAME_BLOCKS_NUMBER = NUM_EDGE_BLOCKS * NUM_EDGE_BLOCKS;
+const SPACE_INDEX = GAME_BLOCKS_NUMBER - 1;
 
 const getIsNextToSpace = (
   currentIndex: number,
@@ -39,42 +35,41 @@ const getIsNextToSpace = (
 const getInitialState = (
   currentBlockIndexes: number[],
   spaceIndex: number
-): State => ({
-  spaceIndex: spaceIndex,
-  gameBlocks: currentBlockIndexes.map((_, index) => ({
+): Block[] =>
+  currentBlockIndexes.map((_, index) => ({
     correctIndex: index,
     currentIndex: index,
     isNextToSpace: getIsNextToSpace(index, spaceIndex),
     isSpace: index === spaceIndex,
-  })),
-});
+  }));
 
 function App() {
-  const [{ gameBlocks, spaceIndex }, setState] = useState(
+  const [gameBlocks, setGameBlocks] = useState(
     getInitialState(
       Array.from({ length: GAME_BLOCKS_NUMBER }).map((_, index) => index),
-      GAME_BLOCKS_NUMBER - 1
+      SPACE_INDEX
     )
   );
 
-  const onMove = useCallback(
-    (index) => {
-      const previousSpace = gameBlocks[spaceIndex];
-      gameBlocks[spaceIndex] = gameBlocks[index];
-      gameBlocks[index] = previousSpace;
-
-      setState({
-        spaceIndex: index,
-        gameBlocks: gameBlocks.map((block, i) => ({
+  const onMove = useCallback((clickedIndex) => {
+    setGameBlocks((prevState) => {
+      const prevSpaceIndex = prevState[SPACE_INDEX].currentIndex;
+      return prevState.map((block) => {
+        let nextIndex = block.currentIndex;
+        if (block.currentIndex === clickedIndex) {
+          nextIndex = prevSpaceIndex;
+        }
+        if (block.currentIndex === prevSpaceIndex) {
+          nextIndex = clickedIndex;
+        }
+        return {
           ...block,
-          currentIndex: i,
-          isNextToSpace: getIsNextToSpace(i, index),
-          isSpace: i === index,
-        })),
+          currentIndex: nextIndex,
+          isNextToSpace: getIsNextToSpace(nextIndex, clickedIndex),
+        };
       });
-    },
-    [gameBlocks, spaceIndex]
-  );
+    });
+  }, []);
 
   const isComplete = useMemo(
     () =>
